@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
+using static UnityEditor.Progress;
 
 public class GridBehavior : MonoBehaviour
 {
@@ -17,9 +17,9 @@ public class GridBehavior : MonoBehaviour
     private void Awake()
     {
         mGrid = GetComponentInChildren<GridLayout>();
-        contents = new GameObject[width, height];
         GameManager.Instance.Register.grid = this;
         mGrid.transform.position = LeftBottom;
+        contents = new GameObject[width, height];
     }
 
     //private void OnDrawGizmos()
@@ -36,22 +36,22 @@ public class GridBehavior : MonoBehaviour
             }
         }
 
-        if (EditorApplication.isPlaying)
-        {
-            Gizmos.color = Color.red;
-            for (int i = 0; i < width; i++)
-            {
-                for (int j = 0; j < height; j++)
-                {
-                    if (contents[i, j])
-                    {
-                        var cellSize = new Vector3(1, 1, 1); var offset = new Vector3(-4.25f, -7.55f) + cellSize / 2;
-                        var pos = offset + cellSize.x * new Vector3(i, j, 0);
-                        Gizmos.DrawWireCube(pos, cellSize);
-                    }
-                }
-            }
-        }
+        //if (EditorApplication.isPlaying)
+        //{
+        //    Gizmos.color = Color.red;
+        //    for (int i = 0; i < width; i++)
+        //    {
+        //        for (int j = 0; j < height; j++)
+        //        {
+        //            if (contents[i, j])
+        //            {
+        //                var cellSize = new Vector3(1, 1, 1); var offset = new Vector3(-4.25f, -7.55f) + cellSize / 2;
+        //                var pos = offset + cellSize.x * new Vector3(i, j, 0);
+        //                Gizmos.DrawWireCube(pos, cellSize);
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     /// <summary>
@@ -133,4 +133,55 @@ public class GridBehavior : MonoBehaviour
 
         return true;
     }
+
+    /// <summary>
+    /// Get maximum row which have content in giving column. (return -1 if can't find)
+    /// </summary>
+    public int GetMaximumRowHaveContent(int column)
+    {
+        for (int i = height-1; i >= 0; i--)
+        {
+            if (GetContent(new Vector3Int(column, i))) return i;
+        }
+
+        return -1;
+    }
+
+    public int GetMaximumRowHaveContent(int column, int startRow)
+    {
+        startRow = Mathf.Clamp(startRow, 0, height-1);
+
+        for (int i = startRow; i >= 0; i--)
+        {
+            if (GetContent(new Vector3Int(column, i))) return i;
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Get minimal row which have content in giving column. (return -1 if can't find)
+    /// </summary>
+    public int GetMinimalRowHaveContent(int column)
+    {
+        for (int i = 0; i < height; i++)
+        {
+            if (!GetContent(new Vector3Int(column, i))) return i-1;
+        }
+
+        return height-1;
+    }
+
+    public void ClearAllContent(bool isDestroy = true)
+    {
+        for (int i = 0; i < contents.GetLength(0); i++)
+        {
+            for (int j = 0; j < contents.GetLength(1); j++)
+            {
+                if (isDestroy && contents[i, j] != null) Destroy(contents[i, j]);
+                contents[i, j] = null;
+            }
+        }
+    }
+
 }

@@ -21,15 +21,15 @@ public class StageController : MonoBehaviour
             if(value == true)
             {
                 //level end callback
-                mPlayerInput.enabled = false;
                 OnLevelEnd?.Invoke();
             }
+
+            Framework.Timer.Instance.SetTimer(RestartLevel, 1f);
         }
     }
 
     public UnityEvent OnLevelEnd, OnTouchGround;
 
-    //public TetrisController ActiveBlock { get; set; }
     private TetrisController activeBlock;
 
     private GridBehavior currentGrid;
@@ -46,6 +46,8 @@ public class StageController : MonoBehaviour
         }
     }
 
+    public Transform blockParent;
+
     private void Awake()
     {
         mStageModel = GetComponent<StageModel>();
@@ -59,10 +61,7 @@ public class StageController : MonoBehaviour
 
     private void Start()
     {
-        
-        RandomCreateTetrisBlock();
-        mStageModel.Score = 0;
-        
+        //init event
         OnLevelEnd.AddListener(() =>
         {
             mPlayerInput.enabled = false;
@@ -74,12 +73,14 @@ public class StageController : MonoBehaviour
             CheckLevelFail();
             RandomCreateTetrisBlock();
         });
-        //Time.timeScale = 10f;
+
+        //init game
+        StartLevel();
     }
 
     private void OnDisable()
     {
-        //auto unregister when destroy
+        //unregister when disable
         GameManager.Instance.Register.stageController = null;
     }
 
@@ -97,7 +98,16 @@ public class StageController : MonoBehaviour
     private void FixedUpdate()
     {
         if(!isLevelEnd) mStageModel.LevelTimer += Time.fixedDeltaTime;
-        if(activeBlock != null) activeBlock.OnFixedUpdate();
+        activeBlock?.OnFixedUpdate();
+    }
+
+    public void StartLevel()
+    {
+        isLevelEnd = false;
+        mPlayerInput.enabled = true;
+        mStageModel.Score = 0;
+        mStageModel.LevelTimer = 0;
+        RandomCreateTetrisBlock();
     }
 
     public void RandomCreateTetrisBlock()
@@ -108,11 +118,11 @@ public class StageController : MonoBehaviour
         var go =
             mStageModel.GetRandomTetrisBlock()
             .Instantiate()
-            .SetPosition(CurrentGrid.CellToWorld(pos));
+            .SetPosition(CurrentGrid.CellToWorld(pos))
+            .SetParent(blockParent);
 
-        //var tetris = go.GetComponent<TetrisController>();
         activeBlock = new TetrisController(go);
-        activeBlock.OnTouchGround = OnTouchGround;
+        activeBlock.OnTouchGround.AddListener(() => OnTouchGround?.Invoke());
     }
 
     public void CheckLineClear()
@@ -188,6 +198,12 @@ public class StageController : MonoBehaviour
         }
 
         if (IsLevelEnd) Debug.Log("LevelEnd");
+    }
+
+    public void RestartLevel()
+    {
+        CurrentGrid.ClearAllContent();
+        StartLevel();
     }
 
     #region Input

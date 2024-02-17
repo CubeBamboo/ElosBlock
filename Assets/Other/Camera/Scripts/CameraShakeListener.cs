@@ -20,4 +20,8 @@ public class CameraShakeListener : MonoBehaviour
         });
     }
 
+    private void OnDestroy()
+    {
+        transform.DOKill();
+    }
 }

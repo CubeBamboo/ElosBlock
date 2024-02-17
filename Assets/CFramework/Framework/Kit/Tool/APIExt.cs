@@ -22,4 +22,16 @@ public static class APIExt
         go.transform.rotation = rot;
         return go;
     }
+
+    public static GameObject SetParent(this GameObject go, Transform parent, bool worldPositionStays=true)
+    {
+        go.transform.SetParent(parent, worldPositionStays);
+        return go;
+    }
+
+    public static GameObject SetName(this GameObject go, string name)
+    {
+        go.name = name;
+        return go;
+    }
 }
