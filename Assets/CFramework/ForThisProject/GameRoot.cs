@@ -7,10 +7,13 @@ public class GameRoot : MonoBehaviour
 {
     private void Start()
     {
+        DontDestroyOnLoad(gameObject);
+
+        AudioManager.Instance.enabled = true;
         GameManager.Instance.enabled = true;
 
         //SceneManager.LoadSceneAsync(0, LoadSceneMode.Single);
         //SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
-        SceneManager.LoadSceneAsync(1);
+        SceneManager.LoadSceneAsync("MainMenu");
     }
 }

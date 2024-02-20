@@ -86,6 +86,7 @@ public class StageController : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
+#if UNITY_EDITOR
         if ((EditorApplication.isPlaying))
         {
             Gizmos.color = Color.red;
@@ -93,6 +94,7 @@ public class StageController : MonoBehaviour
             var end = CurrentGrid.CellToWorld(new Vector3Int(CurrentGrid.width-1, mStageModel.FailLine));
             Gizmos.DrawLine(start, end);
         }
+#endif
     }
 
     private void FixedUpdate()

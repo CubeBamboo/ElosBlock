@@ -5,30 +5,13 @@ using UnityEngine;
 public class AudioManager : Framework.MonoSingletons<AudioManager>
 {
     private AudioSource bgmSource, sfxSource, voiceSource;
-    //public enum ClipName { GameWin, GameFail, ClickButton, HighLight }
-    //private Dictionary<ClipName, AudioClip> clipDict;
-
-
-    //private AudioData audioData;
 
     protected override void Awake()
     {
         base.Awake();
         InitComponent();
         SetDontDestroyOnLoad();
-
-        //clipDict = new Dictionary<ClipName, AudioClip>();
-        //InitClipDict();
     }
-
-    //TODO: ... you have to reconsruct it...
-    //protected void InitClipDict()
-    //{
-    //    clipDict.Add(ClipName.GameWin, clipsData.GameWin);
-    //    clipDict.Add(ClipName.GameFail, clipsData.GameFail);
-    //    clipDict.Add(ClipName.ClickButton, clipsData.ClickButton);
-    //    clipDict.Add(ClipName.HighLight, clipsData.HighLight);
-    //}
 
     private void InitComponent()
     {
