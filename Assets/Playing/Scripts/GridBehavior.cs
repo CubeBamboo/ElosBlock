@@ -11,25 +11,28 @@ public class GridBehavior : MonoBehaviour
 
     public Vector3 cellSize => mGrid.cellSize;
 
-    public Vector2 LeftBottom = new Vector2(-4.256f, -7.556f);
+    [Tooltip("if is null, gizmos will not draw")]
+    public Transform OriginPoint; //origin point
 
     private void Awake()
     {
         mGrid = GetComponentInChildren<GridLayout>();
         GameManager.Instance.Register.grid = this;
-        mGrid.transform.position = LeftBottom;
+        mGrid.transform.position = OriginPoint.position;
         contents = new GameObject[width, height];
     }
 
     //private void OnDrawGizmos()
     private void OnDrawGizmosSelected()
     {
+        if (!OriginPoint) return;
+        
         Gizmos.color = Color.yellow;
         for (int i = 0; i < width; i++)
         {   
             for(int j = 0; j < height; j++)
             {
-                var cellSize = new Vector3(1, 1, 1); var offset = new Vector3(-4.25f, -7.55f) + cellSize/2;
+                var cellSize = new Vector3(1, 1, 1); var offset = OriginPoint.position + cellSize/2;
                 var pos = offset + cellSize.x * new Vector3(i, j, 0);
                 Gizmos.DrawWireCube(pos, cellSize);
             }

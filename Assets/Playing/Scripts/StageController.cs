@@ -1,3 +1,4 @@
+using DG.Tweening;
 using ElosBlock.Playing;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,6 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Interactions;
 
 public class StageController : MonoBehaviour
 {
@@ -12,23 +14,14 @@ public class StageController : MonoBehaviour
     private PlayerInput mPlayerInput;
 
     private bool isLevelEnd;
-    public bool IsLevelEnd
-    {
-        get => isLevelEnd;
-        set
-        {
-            isLevelEnd = value;
-            if(value == true)
-            {
-                //level end callback
-                OnLevelEnd?.Invoke();
-            }
 
-            Framework.Timer.Instance.SetTimer(RestartLevel, 1f);
-        }
-    }
-
+    public UnityEvent OnResetLevel;
     public UnityEvent OnLevelEnd, OnTouchGround;
+    public UnityEvent OnLineClear;
+
+    //TODO: place it to another place.
+    public GameObject levelResetParticlePrefab;
+    public GameObject blockClearFXPrefab;
 
     private TetrisController activeBlock;
 
@@ -72,6 +65,9 @@ public class StageController : MonoBehaviour
             CheckLineClear();
             CheckLevelFail();
             RandomCreateTetrisBlock();
+            Framework.Timer.Instance.StopLoopCall("activeBlock.MoveLeft");
+            Framework.Timer.Instance.StopLoopCall("activeBlock.MoveRight");
+            Framework.Timer.Instance.StopLoopCall("activeBlock.MoveDown");
         });
 
         //init game
@@ -82,6 +78,7 @@ public class StageController : MonoBehaviour
     {
         //unregister when disable
         GameManager.Instance.Register.stageController = null;
+
     }
 
     private void OnDrawGizmosSelected()
@@ -114,7 +111,7 @@ public class StageController : MonoBehaviour
 
     public void RandomCreateTetrisBlock()
     {
-        if (IsLevelEnd) return;
+        if (isLevelEnd) return;
         
         var pos = new Vector3Int(mStageModel.initBlockPos.x, mStageModel.initBlockPos.y, 0);
         var go =
@@ -146,6 +143,7 @@ public class StageController : MonoBehaviour
         ////////////////////////
         if (!needToClear) return;
         
+        OnLineClear?.Invoke();
         int[] dropCntArray = new int[blocks.GetLength(1)];
 
         //clear
@@ -153,10 +151,11 @@ public class StageController : MonoBehaviour
         {
             if (toClearArray[j])
             {
-                //logic1 - remove block of line ${j}
+                //logic1 - remove block of line ${j} and show particle effects
                 for (int i = 0; i < blocks.GetLength(0); i++)
                 {
                     CurrentGrid.RemoveContent(new Vector3Int(i, j, 0), true);
+                    blockClearFXPrefab.Instantiate().SetPosition(CurrentGrid.CellToWorld(new Vector3Int(i, j, 0)));
                 }
                 //logic2 - add score
                 mStageModel.Score += mStageModel.scoreStep;
@@ -191,15 +190,15 @@ public class StageController : MonoBehaviour
         for (int i = blocks.GetLength(1) - 1; i >= 0; i--)
         {
             if (i < failLine) break; //end check
-            if (IsLevelEnd) break;
+            if (isLevelEnd) break;
 
             for (int j = 0; j < blocks.GetLength(0); j++)
             {
-                if (blocks[j, i]) { IsLevelEnd = true; break; }
+                if (blocks[j, i]) { StartCoroutine(SetLevelEnd()); break; }
             }
         }
 
-        if (IsLevelEnd) Debug.Log("LevelEnd");
+        if (isLevelEnd) Debug.Log("LevelEnd");
     }
 
     public void RestartLevel()
@@ -208,24 +207,84 @@ public class StageController : MonoBehaviour
         StartLevel();
     }
 
+    private IEnumerator SetLevelEnd()
+    {
+        isLevelEnd = true;
+        //level end callback
+        OnLevelEnd?.Invoke();
+
+        yield return new WaitForSeconds(0.6f);
+
+        transform.DOShakePosition(0.4f, 3f, 20);
+        CurrentGrid.ClearAllContent();
+        levelResetParticlePrefab.Instantiate().SetPosition(transform.position);
+        OnResetLevel?.Invoke();
+
+        //wait 1s and restart
+        yield return new WaitForSeconds(1.2f);
+        RestartLevel();
+    }
+
     #region Input
 
     public void OnMoveLeftInput(InputAction.CallbackContext ctx)
     {
-        if(ctx.phase == InputActionPhase.Started)
-            activeBlock.MoveLeft();
+        switch (ctx.phase)
+        {
+            case InputActionPhase.Started:
+                activeBlock.MoveLeft();
+                break;
+            case InputActionPhase.Performed:
+                if (ctx.interaction is HoldInteraction)
+                    Framework.Timer.Instance.LoopCall("activeBlock.MoveLeft", activeBlock.MoveLeft, 0.1f);
+                break;
+            case InputActionPhase.Canceled:
+                if (ctx.interaction is HoldInteraction)
+                    Framework.Timer.Instance.StopLoopCall("activeBlock.MoveLeft");
+                break;
+            default:
+                break;
+        }
     }
 
     public void OnMoveRightInput(InputAction.CallbackContext ctx)
     {
-        if (ctx.phase == InputActionPhase.Started)
-            activeBlock.MoveRight();
+        switch (ctx.phase)
+        {
+            case InputActionPhase.Started:
+                activeBlock.MoveRight();
+                break;
+            case InputActionPhase.Performed:
+                if (ctx.interaction is HoldInteraction)
+                    Framework.Timer.Instance.LoopCall("activeBlock.MoveRight", activeBlock.MoveRight, 0.1f);
+                break;
+            case InputActionPhase.Canceled:
+                if (ctx.interaction is HoldInteraction)
+                    Framework.Timer.Instance.StopLoopCall("activeBlock.MoveRight");
+                break;
+            default:
+                break;
+        }
     }
 
     public void OnMoveDownInput(InputAction.CallbackContext ctx)
     {
-        if (ctx.phase == InputActionPhase.Started)
-            activeBlock.MoveDown();
+        switch (ctx.phase)
+        {
+            case InputActionPhase.Started:
+                activeBlock.MoveDown();
+                break;
+            case InputActionPhase.Performed:
+                if (ctx.interaction is HoldInteraction)
+                    Framework.Timer.Instance.LoopCall("activeBlock.MoveDown", activeBlock.MoveDown, 0.1f);
+                break;
+            case InputActionPhase.Canceled:
+                if (ctx.interaction is HoldInteraction)
+                    Framework.Timer.Instance.StopLoopCall("activeBlock.MoveDown");
+                break;
+            default:
+                break;
+        }
     }
 
     public void OnRotateInput(InputAction.CallbackContext ctx)

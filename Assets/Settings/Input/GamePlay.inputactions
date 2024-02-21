@@ -11,7 +11,7 @@
                     "id": "37c6a246-a003-40ed-961a-29c399bb7887",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Tap(duration=0.3),Hold",
                     "initialStateCheck": false
                 },
                 {
@@ -20,7 +20,7 @@
                     "id": "43d67aac-6e66-4cb8-8729-d99767f9e4dd",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Tap(duration=0.3),Hold",
                     "initialStateCheck": false
                 },
                 {
@@ -29,7 +29,7 @@
                     "id": "4b57ba28-e3c2-4a8b-bd49-9f4af43b4e76",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Tap(duration=0.3),Hold",
                     "initialStateCheck": false
                 },
                 {
