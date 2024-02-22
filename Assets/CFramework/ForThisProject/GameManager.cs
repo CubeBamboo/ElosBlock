@@ -2,20 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : Framework.MonoSingletons<GameManager>
+namespace ElosBlock
 {
-    public class RegisterContent
+    public class GameManager : Framework.MonoSingletons<GameManager>
     {
-        public GridBehavior grid { get; set; }
-        public StageController stageController { get; set; }
-    }
+        public class RegisterContent
+        {
+            public CustomGrid grid { get; set; }
+            public StageController stageController { get; set; }
+        }
 
-    public RegisterContent Register { get; private set; }
+        public RegisterContent Register { get; private set; }
 
-    protected override void Awake()
-    {
-        base.Awake();
-        SetDontDestroyOnLoad();
-        Register = new RegisterContent();
+        protected override void Awake()
+        {
+            base.Awake();
+            SetDontDestroyOnLoad();
+            Register = new RegisterContent();
+        }
     }
 }

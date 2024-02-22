@@ -7,7 +7,7 @@ namespace Framework
     /// <summary>
     /// a global event system
     /// </summary>
-    public class EventMgr : Framework.MonoSingletons<EventMgr>
+    public class StringEventManager : Framework.MonoSingletons<StringEventManager>
     {
         protected override void Awake()
         {
@@ -15,34 +15,23 @@ namespace Framework
             SetDontDestroyOnLoad();
         }
 
-        #region CustomClass
-
-        //TODO: how to maintain it
-        /// <summary>
-        /// Record name of events
-        /// </summary>
-        public enum EventName
-        {  }
-
-        #endregion
-
         #region EventManager
 
-        private Dictionary<EventName, System.Action> eventDict = new Dictionary<EventName, System.Action>();
+        private Dictionary<string, System.Action> eventDict = new Dictionary<string, System.Action>();
 
-        public void AddEvent(EventName eventName, System.Action handler)
+        public void AddEvent(string eventName, System.Action handler)
         {
             if (eventDict.ContainsKey(eventName))
                 eventDict[eventName] += handler;
             else
                 eventDict.Add(eventName, handler);
         }
-        public void RemoveEvent(EventName eventName, System.Action handler)
+        public void RemoveEvent(string eventName, System.Action handler)
         {
             if (eventDict.ContainsKey(eventName))
                 eventDict[eventName] -= handler;
         }
-        public void TriggerEvent(EventName eventName)
+        public void TriggerEvent(string eventName)
         {
             if (eventDict.ContainsKey(eventName))
                 eventDict[eventName]?.Invoke();

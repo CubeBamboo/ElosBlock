@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using Framework;
 
 namespace ElosBlock.Playing
 {
@@ -16,8 +17,8 @@ namespace ElosBlock.Playing
         //方块->(下落状态, 着地状态)
         private StageController mStage;
         
-        private GridBehavior currentGrid;
-        public GridBehavior CurrentGrid
+        private CustomGrid currentGrid;
+        public CustomGrid CurrentGrid
         {
             get
             {

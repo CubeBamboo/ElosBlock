@@ -1,304 +1,163 @@
 using DG.Tweening;
-using ElosBlock.Playing;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Interactions;
+using Framework;
 
-public class StageController : MonoBehaviour
+namespace ElosBlock
 {
-    private StageModel mStageModel;
-    private PlayerInput mPlayerInput;
-
-    private bool isLevelEnd;
-
-    public UnityEvent OnResetLevel;
-    public UnityEvent OnLevelEnd, OnTouchGround;
-    public UnityEvent OnLineClear;
-
-    //TODO: place it to another place.
-    public GameObject levelResetParticlePrefab;
-    public GameObject blockClearFXPrefab;
-
-    private TetrisController activeBlock;
-
-    private GridBehavior currentGrid;
-    public GridBehavior CurrentGrid
+    public class StageController : GridBehavior
     {
-        get
-        {
-            if (!currentGrid)
-            {
-                currentGrid = GameManager.Instance.Register.grid;
-            }
+        //component
+        private StageLevelManager levelManager;
+        private StageModel mStageModel;
 
-            return currentGrid;
+        public UnityEvent OnTouchGround;
+        public UnityEvent OnLineClear;
+
+        //TODO: place it to another place
+        public GameObject blockClearFXPrefab;
+
+        private Playing.TetrisController activeBlock;
+        public Playing.TetrisController ActiveBlock => activeBlock;
+
+        public Transform blockParent;
+
+        private void Awake()
+        {
+            levelManager = GetComponent<StageLevelManager>();
+            mStageModel = GetComponent<StageModel>();
         }
-    }
 
-    public Transform blockParent;
-
-    private void Awake()
-    {
-        mStageModel = GetComponent<StageModel>();
-        mPlayerInput = GetComponent<PlayerInput>();
-    }
-
-    private void OnEnable()
-    {
-        GameManager.Instance.Register.stageController = this;
-    }
-
-    private void Start()
-    {
-        //init event
-        OnLevelEnd.AddListener(() =>
+        private void OnEnable()
         {
-            mPlayerInput.enabled = false;
-        });
+            GameManager.Instance.Register.stageController = this;
+        }
 
-        OnTouchGround.AddListener(() =>
+        private void Start()
         {
-            CheckLineClear();
-            CheckLevelFail();
-            RandomCreateTetrisBlock();
-            Framework.Timer.Instance.StopLoopCall("activeBlock.MoveLeft");
-            Framework.Timer.Instance.StopLoopCall("activeBlock.MoveRight");
-            Framework.Timer.Instance.StopLoopCall("activeBlock.MoveDown");
-        });
+            OnTouchGround.AddListenerWithCustomUnRegister(() =>
+            {
+                CheckLineClear();
+                CheckLevelFail();
+                RandomCreateTetrisBlock();
+            }).UnRegisterWhenGameObjectDestroyed(gameObject);
 
-        //init game
-        StartLevel();
-    }
+            //init game
+            levelManager.StartLevel();
+        }
 
-    private void OnDisable()
-    {
-        //unregister when disable
-        GameManager.Instance.Register.stageController = null;
-
-    }
-
-    private void OnDrawGizmosSelected()
-    {
+        private void OnDrawGizmosSelected()
+        {
 #if UNITY_EDITOR
-        if ((EditorApplication.isPlaying))
-        {
-            Gizmos.color = Color.red;
-            var start = CurrentGrid.CellToWorld(new Vector3Int(0, mStageModel.FailLine));
-            var end = CurrentGrid.CellToWorld(new Vector3Int(CurrentGrid.width-1, mStageModel.FailLine));
-            Gizmos.DrawLine(start, end);
-        }
+            if ((EditorApplication.isPlaying))
+            {
+                Gizmos.color = Color.red;
+                var start = CurrentGrid.CellToWorld(new Vector3Int(0, mStageModel.FailLine));
+                var end = CurrentGrid.CellToWorld(new Vector3Int(CurrentGrid.width - 1, mStageModel.FailLine));
+                Gizmos.DrawLine(start, end);
+            }
 #endif
-    }
-
-    private void FixedUpdate()
-    {
-        if(!isLevelEnd) mStageModel.LevelTimer += Time.fixedDeltaTime;
-        activeBlock?.OnFixedUpdate();
-    }
-
-    public void StartLevel()
-    {
-        isLevelEnd = false;
-        mPlayerInput.enabled = true;
-        mStageModel.Score = 0;
-        mStageModel.LevelTimer = 0;
-        RandomCreateTetrisBlock();
-    }
-
-    public void RandomCreateTetrisBlock()
-    {
-        if (isLevelEnd) return;
-        
-        var pos = new Vector3Int(mStageModel.initBlockPos.x, mStageModel.initBlockPos.y, 0);
-        var go =
-            mStageModel.GetRandomTetrisBlock()
-            .Instantiate()
-            .SetPosition(CurrentGrid.CellToWorld(pos))
-            .SetParent(blockParent);
-
-        activeBlock = new TetrisController(go);
-        activeBlock.OnTouchGround.AddListener(() => OnTouchGround?.Invoke());
-    }
-
-    public void CheckLineClear()
-    {
-        var blocks = CurrentGrid.GetContentContainer();
-        bool[] toClearArray = new bool[blocks.GetLength(1)];
-        bool needToClear = false;
-
-        //check every line
-        for (int j = 0; j < blocks.GetLength(1); j++)
-        {
-            toClearArray[j] = true;
-            for (int i = 0; i < blocks.GetLength(0); i++)
-                if (!blocks[i, j]) { toClearArray[j] = false; break; }
-
-            if (toClearArray[j]) needToClear = true;
         }
 
-        ////////////////////////
-        if (!needToClear) return;
-        
-        OnLineClear?.Invoke();
-        int[] dropCntArray = new int[blocks.GetLength(1)];
-
-        //clear
-        for (int j = 0; j < blocks.GetLength(1); j++)
+        private void FixedUpdate()
         {
-            if (toClearArray[j])
+            activeBlock?.OnFixedUpdate();
+        }
+
+        public void RandomCreateTetrisBlock()
+        {
+            if (levelManager.IsLevelEnd) return;
+
+            var pos = new Vector3Int(mStageModel.initBlockPos.x, mStageModel.initBlockPos.y, 0);
+            var go =
+                mStageModel.GetRandomTetrisBlock()
+                .Instantiate()
+                .SetPosition(CurrentGrid.CellToWorld(pos))
+                .SetParent(blockParent);
+
+            activeBlock = new Playing.TetrisController(go);
+            activeBlock.OnTouchGround.AddListener(() => OnTouchGround?.Invoke());
+        }
+
+        public void CheckLineClear()
+        {
+            var blocks = CurrentGrid.GetContentContainer();
+            bool[] toClearArray = new bool[blocks.GetLength(1)];
+            bool needToClear = false;
+
+            //check every line
+            for (int j = 0; j < blocks.GetLength(1); j++)
             {
-                //logic1 - remove block of line ${j} and show particle effects
+                toClearArray[j] = true;
                 for (int i = 0; i < blocks.GetLength(0); i++)
+                    if (!blocks[i, j]) { toClearArray[j] = false; break; }
+
+                if (toClearArray[j]) needToClear = true;
+            }
+
+            ////////////////////////
+            if (!needToClear) return;
+
+            OnLineClear?.Invoke();
+            int[] dropCntArray = new int[blocks.GetLength(1)];
+
+            //clear
+            for (int j = 0; j < blocks.GetLength(1); j++)
+            {
+                if (toClearArray[j])
                 {
-                    CurrentGrid.RemoveContent(new Vector3Int(i, j, 0), true);
-                    blockClearFXPrefab.Instantiate().SetPosition(CurrentGrid.CellToWorld(new Vector3Int(i, j, 0)));
+                    //logic1 - remove block of line ${j} and show particle effects
+                    for (int i = 0; i < blocks.GetLength(0); i++)
+                    {
+                        CurrentGrid.RemoveContent(new Vector3Int(i, j, 0), true);
+                        blockClearFXPrefab.Instantiate().SetPosition(CurrentGrid.CellToWorld(new Vector3Int(i, j, 0)));
+                    }
+                    //logic2 - add score
+                    mStageModel.Score += mStageModel.scoreStep;
                 }
-                //logic2 - add score
-                mStageModel.Score += mStageModel.scoreStep;
             }
-        }
 
-        //logic3 - drop the block (from bottom to top)
-        for (int j = 0; j < blocks.GetLength(1); j++)
-        {
-            if (toClearArray[j])
+            //logic3 - drop the block (from bottom to top)
+            for (int j = 0; j < blocks.GetLength(1); j++)
             {
-                for (int index = j + 1; index < dropCntArray.Length; index++)
-                    dropCntArray[index]++;
-                dropCntArray[j] = 0;
+                if (toClearArray[j])
+                {
+                    for (int index = j + 1; index < dropCntArray.Length; index++)
+                        dropCntArray[index]++;
+                    dropCntArray[j] = 0;
+                }
             }
-        }
-        for (int j = 0; j < blocks.GetLength(1); j++)
-        {
-            if (dropCntArray[j] <= 0) continue;
-            for (int i = 0; i < blocks.GetLength(0); i++)
-                if (CurrentGrid.GetContent(new Vector3Int(i, j)))
-                    CurrentGrid.MoveContent(new Vector3Int(i, j), new Vector3Int(i, j - dropCntArray[j]));
-        }
-    }
-
-    public void CheckLevelFail()
-    {
-        //方块是否比该位置更高
-        var blocks = CurrentGrid.GetContentContainer();
-        var failLine = mStageModel.FailLine;
-        
-        for (int i = blocks.GetLength(1) - 1; i >= 0; i--)
-        {
-            if (i < failLine) break; //end check
-            if (isLevelEnd) break;
-
-            for (int j = 0; j < blocks.GetLength(0); j++)
+            for (int j = 0; j < blocks.GetLength(1); j++)
             {
-                if (blocks[j, i]) { StartCoroutine(SetLevelEnd()); break; }
+                if (dropCntArray[j] <= 0) continue;
+                for (int i = 0; i < blocks.GetLength(0); i++)
+                    if (CurrentGrid.GetContent(new Vector3Int(i, j)))
+                        CurrentGrid.MoveContent(new Vector3Int(i, j), new Vector3Int(i, j - dropCntArray[j]));
             }
         }
 
-        if (isLevelEnd) Debug.Log("LevelEnd");
-    }
-
-    public void RestartLevel()
-    {
-        CurrentGrid.ClearAllContent();
-        StartLevel();
-    }
-
-    private IEnumerator SetLevelEnd()
-    {
-        isLevelEnd = true;
-        //level end callback
-        OnLevelEnd?.Invoke();
-
-        yield return new WaitForSeconds(0.6f);
-
-        transform.DOShakePosition(0.4f, 3f, 20);
-        CurrentGrid.ClearAllContent();
-        levelResetParticlePrefab.Instantiate().SetPosition(transform.position);
-        OnResetLevel?.Invoke();
-
-        //wait 1s and restart
-        yield return new WaitForSeconds(1.2f);
-        RestartLevel();
-    }
-
-    #region Input
-
-    public void OnMoveLeftInput(InputAction.CallbackContext ctx)
-    {
-        switch (ctx.phase)
+        public void CheckLevelFail()
         {
-            case InputActionPhase.Started:
-                activeBlock.MoveLeft();
-                break;
-            case InputActionPhase.Performed:
-                if (ctx.interaction is HoldInteraction)
-                    Framework.Timer.Instance.LoopCall("activeBlock.MoveLeft", activeBlock.MoveLeft, 0.1f);
-                break;
-            case InputActionPhase.Canceled:
-                if (ctx.interaction is HoldInteraction)
-                    Framework.Timer.Instance.StopLoopCall("activeBlock.MoveLeft");
-                break;
-            default:
-                break;
+            //方块是否比该位置更高
+            var blocks = CurrentGrid.GetContentContainer();
+            var failLine = mStageModel.FailLine;
+
+            for (int i = blocks.GetLength(1) - 1; i >= 0; i--)
+            {
+                if (i < failLine) break; //end check
+                if (levelManager.IsLevelEnd) break;
+
+                for (int j = 0; j < blocks.GetLength(0); j++)
+                {
+                    if (blocks[j, i])
+                        { levelManager.IsLevelEnd = true; break; }
+                }
+            }
+
+            if (levelManager.IsLevelEnd) Debug.Log("LevelEnd");
         }
     }
-
-    public void OnMoveRightInput(InputAction.CallbackContext ctx)
-    {
-        switch (ctx.phase)
-        {
-            case InputActionPhase.Started:
-                activeBlock.MoveRight();
-                break;
-            case InputActionPhase.Performed:
-                if (ctx.interaction is HoldInteraction)
-                    Framework.Timer.Instance.LoopCall("activeBlock.MoveRight", activeBlock.MoveRight, 0.1f);
-                break;
-            case InputActionPhase.Canceled:
-                if (ctx.interaction is HoldInteraction)
-                    Framework.Timer.Instance.StopLoopCall("activeBlock.MoveRight");
-                break;
-            default:
-                break;
-        }
-    }
-
-    public void OnMoveDownInput(InputAction.CallbackContext ctx)
-    {
-        switch (ctx.phase)
-        {
-            case InputActionPhase.Started:
-                activeBlock.MoveDown();
-                break;
-            case InputActionPhase.Performed:
-                if (ctx.interaction is HoldInteraction)
-                    Framework.Timer.Instance.LoopCall("activeBlock.MoveDown", activeBlock.MoveDown, 0.1f);
-                break;
-            case InputActionPhase.Canceled:
-                if (ctx.interaction is HoldInteraction)
-                    Framework.Timer.Instance.StopLoopCall("activeBlock.MoveDown");
-                break;
-            default:
-                break;
-        }
-    }
-
-    public void OnRotateInput(InputAction.CallbackContext ctx)
-    {
-        if (ctx.phase == InputActionPhase.Started)
-            activeBlock.Rotate();
-    }
-
-    public void OnDropToGroundInput(InputAction.CallbackContext ctx)
-    {
-        if (ctx.phase == InputActionPhase.Started)
-            activeBlock.DropToGround();
-    }
-
-    #endregion
-
 }

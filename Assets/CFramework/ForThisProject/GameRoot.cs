@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameRoot : MonoBehaviour
+namespace ElosBlock
 {
-    private void Start()
+    public class GameRoot : MonoBehaviour
     {
-        DontDestroyOnLoad(gameObject);
+        private void Start()
+        {
+            DontDestroyOnLoad(gameObject);
 
-        AudioManager.Instance.enabled = true;
-        GameManager.Instance.enabled = true;
+            AudioManager.Instance.enabled = true;
+            GameManager.Instance.enabled = true;
 
-        //SceneManager.LoadSceneAsync(0, LoadSceneMode.Single);
-        //SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
-        SceneManager.LoadSceneAsync("MainMenu");
+            //SceneManager.LoadSceneAsync(0, LoadSceneMode.Single);
+            //SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
+            SceneManager.LoadSceneAsync("MainMenu");
+        }
     }
 }

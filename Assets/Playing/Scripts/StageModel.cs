@@ -4,41 +4,55 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class StageModel : MonoBehaviour
+namespace ElosBlock
 {
-    public GameObject[] ElosBlockPrefab;
-    public Vector2Int initBlockPos;
-    private float mLevelTimer;
-    public float LevelTimer
+    public class StageModel : MonoBehaviour
     {
-        get => mLevelTimer;
-        set
+        public GameObject[] ElosBlockPrefab;
+        public Vector2Int initBlockPos;
+        private float mLevelTimer;
+        public float LevelTimer
         {
-            mLevelTimer = value;
-            OnLevelTimerChanged?.Invoke(mLevelTimer);
+            get => mLevelTimer;
+            set
+            {
+                mLevelTimer = value;
+                OnLevelTimerChanged?.Invoke(mLevelTimer);
+            }
         }
-    }
 
-    private int mScore;
-    public int Score
-    {
-        get => mScore;
-        set
+        private int mScore;
+        public int Score
         {
-            mScore = value;
-            OnScoreChanged?.Invoke(mScore);
+            get => mScore;
+            set
+            {
+                mScore = value;
+                OnScoreChanged?.Invoke(mScore);
+            }
         }
-    }
 
-    public int scoreStep;
-    public UnityEvent<int> OnScoreChanged;
-    public UnityEvent<float> OnLevelTimerChanged;
+        public int scoreStep;
+        public UnityEvent<int> OnScoreChanged;
+        public UnityEvent<float> OnLevelTimerChanged;
 
-    public int FailLine; //level fail if block higher than the line
+        public int FailLine; //level fail if block higher than the line
 
-    public GameObject GetRandomTetrisBlock()
-    {
-        return ElosBlockPrefab[Random.Range(0, ElosBlockPrefab.Length)];
-        //return ElosBlockPrefab[4];
+        private StageLevelManager levelManager;
+
+        private void Start()
+        {
+            levelManager = GetComponent<StageLevelManager>();
+        }
+
+        public GameObject GetRandomTetrisBlock()
+        {
+            return ElosBlockPrefab[Random.Range(0, ElosBlockPrefab.Length)];
+        }
+
+        private void FixedUpdate()
+        {
+            if (!levelManager.IsLevelEnd) LevelTimer += Time.fixedDeltaTime;
+        }
     }
 }
