@@ -818,12 +818,14 @@ PlayableDirector:
   m_GameObject: {fileID: 243802371}
   m_Enabled: 1
   serializedVersion: 3
-  m_PlayableAsset: {fileID: 0}
+  m_PlayableAsset: {fileID: 11400000, guid: 23ed2c0785789af48878479030650f54, type: 2}
   m_InitialState: 1
   m_WrapMode: 2
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
-  m_SceneBindings: []
+  m_SceneBindings:
+  - key: {fileID: 5965915467117443560, guid: 23ed2c0785789af48878479030650f54, type: 2}
+    value: {fileID: 522056521}
   m_ExposedReferences:
     m_References: []
 --- !u!1 &248719200
@@ -1654,6 +1656,7 @@ GameObject:
   - component: {fileID: 522056520}
   - component: {fileID: 522056518}
   - component: {fileID: 522056512}
+  - component: {fileID: 522056521}
   m_Layer: 0
   m_Name: Stage
   m_TagString: Untagged
@@ -2005,6 +2008,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06e08d1d0dbd2c0478136f47ecf21297, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &522056521
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 522056510}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &543662140
 PrefabInstance:
   m_ObjectHideFlags: 0
