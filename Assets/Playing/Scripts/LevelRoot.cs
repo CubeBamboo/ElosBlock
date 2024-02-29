@@ -1,3 +1,4 @@
+using Framework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +21,7 @@ public class LevelRoot : MonoBehaviour
     private float timeBuffer = 2.0f;
 
     public UnityEvent<float> OnTimerValueChanged;
+    public UnityEvent OnSceneUnload;
 
     private void Update()
     {
@@ -30,12 +32,18 @@ public class LevelRoot : MonoBehaviour
         }
         else
             Timer = 0;
-
-
     }
 
     private void Escape()
     {
-        SceneManager.LoadScene("MainMenu");
+        OnSceneUnload?.Invoke();
+        SceneTransition.Instance.DoTransition(halfTimeCoroutine: LoadScene(), transType: SceneTransition.TransType.SceneLoad);
+    }
+
+    private IEnumerator LoadScene()
+    {
+        yield return new WaitForSeconds(0.8f);
+        yield return SceneManager.LoadSceneAsync("MainMenu", LoadSceneMode.Additive);
+        yield return SceneManager.UnloadSceneAsync("Level_Normal");
     }
 }

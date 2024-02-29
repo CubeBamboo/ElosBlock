@@ -10,6 +10,11 @@ public class LevelUI_Canvas : MonoBehaviour
     
     public GameObject Panel_GamingEnd;
 
+    private void Start()
+    {
+        GetComponent<Canvas>().worldCamera = Camera.main;
+    }
+
     public void OpenGamingEndPanel()
     {
         Panel_GamingEnd.SetActive(true);

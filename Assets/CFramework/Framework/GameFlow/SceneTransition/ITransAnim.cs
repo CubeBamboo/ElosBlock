@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Framework.GameFlow
+namespace Framework
 {
     public interface ITransAnim
     {
@@ -19,6 +19,15 @@ namespace Framework.GameFlow
         /// <summary>
         /// play anim and do oncomplete callback ()=>_transition.OnAnimExitEnd();
         /// </summary>
+        public abstract void DoExitAnim();
+    }
+
+    public abstract class AbstractTransAnim : ITransAnim
+    {
+        public SceneTransition _transition => SceneTransition.Instance;
+
+        public abstract void DoEnterAnim();
+        public abstract void DoHalfTimeAnim();
         public abstract void DoExitAnim();
     }
 }

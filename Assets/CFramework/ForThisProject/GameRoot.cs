@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.AddressableAssets;
 
-namespace ElosBlock
+namespace Framework
 {
     public class GameRoot : MonoBehaviour
     {
@@ -12,11 +13,18 @@ namespace ElosBlock
             DontDestroyOnLoad(gameObject);
 
             AudioManager.Instance.enabled = true;
-            GameManager.Instance.enabled = true;
+            ElosBlock.GameManager.Instance.enabled = true;
+            SceneTransition.Instance.enabled = true;
 
-            //SceneManager.LoadSceneAsync(0, LoadSceneMode.Single);
-            //SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
-            SceneManager.LoadSceneAsync("MainMenu");
+            StartCoroutine(InitScene());
+        }
+
+        private IEnumerator InitScene()
+        {
+            yield return SceneManager.LoadSceneAsync("Persistent", LoadSceneMode.Additive);
+            yield return SceneManager.LoadSceneAsync("MainMenu", LoadSceneMode.Additive);
+            
+            SceneManager.UnloadSceneAsync("Launch");
         }
     }
 }

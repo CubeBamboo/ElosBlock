@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Framework.GameFlow
+namespace Framework
 {
     //[RequireComponent(typeof(Image))] //TODO: maybe image in canvas?
-    public class SampleTransAnim : MonoBehaviour, ITransAnim //TODO: abstrct class
+    public class DefaultTransAnim : MonoBehaviour, ITransAnim //TODO: abstrct class
     {
         #region Common
 
@@ -27,22 +27,30 @@ namespace Framework.GameFlow
 
         #endregion
 
+        [SerializeField] private Color targetColor = Color.black;
+        private Canvas _canvas;
         private Image _panel;
         
         private void Start()
         {
-            _transition = GetComponent<SceneTransition>();
-            _panel = GetComponentInChildren<Image>();
-            if (!_panel) Debug.LogWarning("SceneTransition don't have a target panel");
+            _canvas = GetComponent<Canvas>();
+            _transition = SceneTransition.Instance;
+            _panel = gameObject.AddComponent<Image>();
+            //if (!_panel) Debug.LogWarning("SceneTransition don't have a target panel");
 
             Init();
         }
 
         private void Init()
         {
+            _canvas.sortingOrder = 10;
+
+            _panel.color = targetColor;
             var color = _panel.color;
             color.a = 0;
             _panel.color = color;
+
+            _panel.raycastTarget = false;
         }
 
         public void DoEnterAnim()

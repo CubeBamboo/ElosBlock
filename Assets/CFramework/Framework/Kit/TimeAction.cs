@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Framework
 {
-    public class Timer : MonoSingletons<Timer>
+    public class TimeAction : MonoSingletons<TimeAction>
     {
         private Dictionary<string, Sequence> loopDict = new Dictionary<string, Sequence>();
         
@@ -37,7 +37,6 @@ namespace Framework
 
             loopDict.Clear();
         }
-
 
         public void SetTimer(System.Action call, float delayTime)
         {

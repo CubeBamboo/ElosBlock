@@ -11,9 +11,6 @@ public class foo : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current.vKey.wasPressedThisFrame)
-        {
-            _evt.Invoke();
-        }
+        
     }
 }

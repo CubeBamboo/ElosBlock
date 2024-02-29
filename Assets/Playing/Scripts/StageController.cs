@@ -87,13 +87,15 @@ namespace ElosBlock
             var blocks = CurrentGrid.GetContentContainer();
             bool[] toClearArray = new bool[blocks.GetLength(1)];
             bool needToClear = false;
+            int clearCnt = toClearArray.Length; // how many lines need to clear
 
             //check every line
             for (int j = 0; j < blocks.GetLength(1); j++)
             {
                 toClearArray[j] = true;
                 for (int i = 0; i < blocks.GetLength(0); i++)
-                    if (!blocks[i, j]) { toClearArray[j] = false; break; }
+                    if (!blocks[i, j])
+                        { toClearArray[j] = false; clearCnt--; break; }
 
                 if (toClearArray[j]) needToClear = true;
             }

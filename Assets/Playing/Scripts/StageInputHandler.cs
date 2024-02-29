@@ -22,9 +22,9 @@ namespace ElosBlock
 
             mStageController.OnTouchGround.AddListenerWithCustomUnRegister(() =>
             {
-                Framework.Timer.Instance.StopLoopCall("activeBlock.MoveLeft");
-                Framework.Timer.Instance.StopLoopCall("activeBlock.MoveRight");
-                Framework.Timer.Instance.StopLoopCall("activeBlock.MoveDown");
+                Framework.TimeAction.Instance.StopLoopCall("activeBlock.MoveLeft");
+                Framework.TimeAction.Instance.StopLoopCall("activeBlock.MoveRight");
+                Framework.TimeAction.Instance.StopLoopCall("activeBlock.MoveDown");
             }).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
@@ -59,11 +59,11 @@ namespace ElosBlock
                     break;
                 case InputActionPhase.Performed:
                     if (ctx.interaction is HoldInteraction)
-                        Framework.Timer.Instance.LoopCall("activeBlock.MoveLeft", activeBlock.MoveLeft, 0.1f);
+                        Framework.TimeAction.Instance.LoopCall("activeBlock.MoveLeft", activeBlock.MoveLeft, 0.1f);
                     break;
                 case InputActionPhase.Canceled:
                     if (ctx.interaction is HoldInteraction)
-                        Framework.Timer.Instance.StopLoopCall("activeBlock.MoveLeft");
+                        Framework.TimeAction.Instance.StopLoopCall("activeBlock.MoveLeft");
                     break;
                 default:
                     break;
@@ -79,11 +79,11 @@ namespace ElosBlock
                     break;
                 case InputActionPhase.Performed:
                     if (ctx.interaction is HoldInteraction)
-                        Framework.Timer.Instance.LoopCall("activeBlock.MoveRight", activeBlock.MoveRight, 0.1f);
+                        Framework.TimeAction.Instance.LoopCall("activeBlock.MoveRight", activeBlock.MoveRight, 0.1f);
                     break;
                 case InputActionPhase.Canceled:
                     if (ctx.interaction is HoldInteraction)
-                        Framework.Timer.Instance.StopLoopCall("activeBlock.MoveRight");
+                        Framework.TimeAction.Instance.StopLoopCall("activeBlock.MoveRight");
                     break;
                 default:
                     break;
@@ -99,11 +99,11 @@ namespace ElosBlock
                     break;
                 case InputActionPhase.Performed:
                     if (ctx.interaction is HoldInteraction)
-                        Framework.Timer.Instance.LoopCall("activeBlock.MoveDown", activeBlock.MoveDown, 0.1f);
+                        Framework.TimeAction.Instance.LoopCall("activeBlock.MoveDown", activeBlock.MoveDown, 0.1f);
                     break;
                 case InputActionPhase.Canceled:
                     if (ctx.interaction is HoldInteraction)
-                        Framework.Timer.Instance.StopLoopCall("activeBlock.MoveDown");
+                        Framework.TimeAction.Instance.StopLoopCall("activeBlock.MoveDown");
                     break;
                 default:
                     break;

@@ -4,17 +4,21 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-namespace Framework.GameFlow
+namespace Framework
 {
-    [RequireComponent(typeof(ITransAnim))]
     public class SceneTransition : MonoSingletons<SceneTransition>
     {
         public enum Event { OnAnimStart, OnAnimEnterEnd, OnAnimEnd }
         public enum State { Idle, Entering, HalfTime, Exiting }
+        public enum TransType { Normal, SceneLoad }
+
+        public ITransAnim defaultTransAnim => gameObject.GetComponent<DefaultTransAnim>();
 
         private ITransAnim transAnim;
         private event System.Action m_OnAnimStart, m_OnAnimEnterEnd, m_OnAnimEnd;
         public State state { get; set; }
+
+        public VoidEventSO OnSceneUnload;
 
         #region UnityEvent
 
@@ -22,16 +26,12 @@ namespace Framework.GameFlow
         {
             base.Awake();
             SetDontDestroyOnLoad();
-        }
-
-        private void Start()
-        {
-            transAnim = GetComponent<ITransAnim>();
+            transAnim = gameObject.AddComponent<DefaultTransAnim>();
         }
 
         #endregion
 
-        #region public interface
+        #region public Animation interface
 
         public void OnAnimEnterEnd()
         {
@@ -48,37 +48,91 @@ namespace Framework.GameFlow
 
         #endregion
 
-        #region publicFunc
+        #region Settings
 
-        public void DoTransition(System.Action onAnimStart = null, System.Action onAnimEntered=null, System.Action onAnimExited=null)
+        public void SetTransAnim(ITransAnim transAnim)
+        {
+            this.transAnim = transAnim;
+        }
+
+        #endregion
+
+        #region public Func
+
+        public void DoTransition(IEnumerator halfTimeCoroutine = null, System.Action onAnimStart = null, System.Action onAnimEntered=null, System.Action onAnimExited=null, TransType transType=TransType.Normal)
         {
             if (state != State.Idle) return;
+
+            if (transType == TransType.SceneLoad)
+                OnSceneUnload?.Raise();
 
             SetEvent(Event.OnAnimStart, onAnimStart);
             SetEvent(Event.OnAnimEnterEnd, onAnimEntered);
             SetEvent(Event.OnAnimEnd, onAnimExited);
-            StartCoroutine(M_BaseTransFlow(null));
+            StartCoroutine(M_BaseTransFlow(halfTimeCoroutine));
         }
 
-        /// <summary>
-        /// load scene async with transition
-        /// </summary>
-        public void LoadScene(GlobalData.SceneIndex sceneIndex)
+        //public void LoadScene(GlobalData.SceneIndex sceneIndex)
+        //{
+        //    if (state != State.Idle) return;
+
+        //    SetEvent(Event.OnAnimEnterEnd, () => SceneManager.LoadScene((int)sceneIndex));
+        //    StartCoroutine(M_BaseTransFlow(null));
+        //}
+
+        //public void LoadSceneAsync(GlobalData.SceneIndex sceneIndex)
+        //{
+        //    if (state != State.Idle) return;
+
+        //    StartCoroutine(M_BaseTransFlow(Coroutine_LoadSceneAsync((int)sceneIndex)));
+        //}
+
+        //public void LoadSceneAsync(string sceneName)
+        //{
+        //    if (state != State.Idle) return;
+
+        //    StartCoroutine(M_BaseTransFlow(Coroutine_LoadSceneAsync(sceneName)));
+        //}
+
+        //private IEnumerator Coroutine_LoadSceneAsync(int sceneIndex)
+        //{
+        //    var operation = SceneManager.LoadSceneAsync(sceneIndex);
+        //    while (!operation.isDone) yield return null;
+        //}
+
+        //private IEnumerator Coroutine_LoadSceneAsync(string sceneName)
+        //{
+        //    var operation = SceneManager.LoadSceneAsync(sceneName);
+        //    while (!operation.isDone) yield return null;
+        //}
+
+
+        #endregion
+
+        #region CoreFunc
+
+        private IEnumerator M_BaseTransFlow(IEnumerator HalfTimeCoroutine)
         {
-            if (state != State.Idle) return;
+            m_OnAnimStart?.Invoke();  //event
 
-            SetEvent(Event.OnAnimEnterEnd, () => SceneManager.LoadScene((int)sceneIndex));
-            StartCoroutine(M_BaseTransFlow(null));
-        }
+            //Entering
+            state = State.Entering;
+            transAnim.DoEnterAnim();
+            while (state != State.HalfTime) yield return null;
 
-        /// <summary>
-        /// load scene async with transition
-        /// </summary>
-        public void LoadSceneAsync(GlobalData.SceneIndex sceneIndex)
-        {
-            if (state != State.Idle) return;
+            //HalfTime
+            m_OnAnimEnterEnd?.Invoke();    //event
+            transAnim.DoHalfTimeAnim();
+            if (HalfTimeCoroutine != null) yield return StartCoroutine(HalfTimeCoroutine); //event
+            while (state != State.Exiting) yield return null;
 
-            StartCoroutine(M_BaseTransFlow(Coroutine_LoadSceneAsync((int)sceneIndex)));
+            //Exiting
+            transAnim.DoExitAnim();
+            while (state != State.Idle) yield return null;
+
+            //Trans End , And do some destruct work...
+            m_OnAnimEnd?.Invoke(); //event
+            ResetEvent();
         }
 
         public void SetEvent(Event eventEnum, System.Action call)
@@ -111,113 +165,5 @@ namespace Framework.GameFlow
         }
 
         #endregion
-
-        #region CoreFunc
-
-        private IEnumerator M_BaseTransFlow(IEnumerator HalfTimeCoroutine)
-        {
-            m_OnAnimStart?.Invoke();  //event
-
-            //Entering
-            state = State.Entering;
-            transAnim.DoEnterAnim();
-            while (state != State.HalfTime) yield return null;
-
-            //HalfTime
-            m_OnAnimEnterEnd?.Invoke();    //event
-            transAnim.DoHalfTimeAnim();
-            if (HalfTimeCoroutine != null) yield return StartCoroutine(HalfTimeCoroutine); //event
-            while (state != State.Exiting) yield return null;
-
-            //Exiting
-            transAnim.DoExitAnim();
-            while (state != State.Idle) yield return null;
-
-            //Trans End , And do some destruct work...
-            m_OnAnimEnd?.Invoke(); //event
-            ResetEvent();
-        }
-
-        private IEnumerator Coroutine_LoadSceneAsync(int sceneIndex)
-        {
-            var operation = SceneManager.LoadSceneAsync(sceneIndex);
-            while (!operation.isDone) yield return null;
-        }
-
-        #endregion
-
-        //private void M_LoadSceneAsync(int sceneIndex)
-        //{
-        //    StartCoroutine(M_BaseTransFlow(Coroutine_LoadSceneAsync(sceneIndex)));
-        //}
-
-        //private void M_DoTransition()
-        //{
-        //    StartCoroutine(M_BaseTransFlow(null));
-        //}
-
-        //public void DoTransition(IEnumerator onAnimEnterEnd)
-        //{
-        //    if (state != State.Idle) return;
-
-        //    StartCoroutine(M_DoTransition(onAnimEnterEnd));
-        //}
-
-        //private IEnumerator M_DoTransition(IEnumerator onAnimEnterEnd)
-        //{
-        //    state = State.Entering;
-
-        //    transAnim.DoEnterAnim();
-        //    while (state != State.HalfTime) yield return null;
-
-        //    OnAnimEntered?.Invoke();
-        //    yield return StartCoroutine(onAnimEnterEnd);
-
-        //    state = State.Exiting;
-
-        //    transAnim.DoExitAnim();
-        //    while (state != State.Idle) yield return null;
-        //    OnAnimExited?.Invoke();
-
-        //    ResetEvent();
-        //}
-
-        //private void M_DoTransition()
-        //{
-
-        //    //state = State.Entering;
-
-        //    //transAnim.DoEnterAnim();
-
-        //    //while(state != State.HalfTime) yield return null;
-        //    //OnAnimEntered?.Invoke();
-        //    //state = State.Exiting;
-
-        //    //transAnim.DoExitAnim();
-        //    //while (state != State.Idle) yield return null;
-        //    //OnAnimExited?.Invoke();
-
-        //    //ResetEvent();
-
-        //}
-
-        //private void M_LoadSceneAsync(int sceneIndex)
-        //{
-        //    //state = State.Entering;
-
-        //    //transAnim.DoEnterAnim();
-        //    //while (state != State.HalfTime) yield return null;
-
-        //    //OnAnimEntered?.Invoke();
-
-
-        //    //state = State.Exiting;
-
-        //    //transAnim.DoExitAnim();
-        //    //while (state != State.Idle) yield return null;
-        //    //OnAnimExited?.Invoke();
-
-        //    //ResetEvent();
-        //}
     }
 }

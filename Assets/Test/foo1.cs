@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Playables;
 
 public class foo1 : MonoBehaviour
 {
@@ -17,5 +18,7 @@ public class foo1 : MonoBehaviour
         {
             Debug.Log("111");
         });
+        //ExposedReference<foo> _foo = new ExposedReference<foo>();
+        //_foo.Resolve(new PlayableGraph().GetResolver());
     }
 }
