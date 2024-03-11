@@ -47,7 +47,8 @@ namespace ElosBlock
 
         public GameObject GetRandomTetrisBlock()
         {
-            return ElosBlockPrefab[Random.Range(0, ElosBlockPrefab.Length)];
+            //return ElosBlockPrefab[Random.Range(0, ElosBlockPrefab.Length)];
+            return ElosBlockPrefab[4];
         }
 
         private void FixedUpdate()

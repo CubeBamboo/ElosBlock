@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem.Interactions;
 using UnityEngine.InputSystem;
 using Framework;
+using UnityEngine.Events;
 
 namespace ElosBlock
 {
@@ -20,17 +21,20 @@ namespace ElosBlock
 
             mStageController = GetComponent<StageController>();
 
-            mStageController.OnTouchGround.AddListenerWithCustomUnRegister(() =>
-            {
-                Framework.TimeAction.Instance.StopLoopCall("activeBlock.MoveLeft");
-                Framework.TimeAction.Instance.StopLoopCall("activeBlock.MoveRight");
-                Framework.TimeAction.Instance.StopLoopCall("activeBlock.MoveDown");
-            }).UnRegisterWhenGameObjectDestroyed(gameObject);
+            mStageController.OnTouchGround.AddListenerWithCustomUnRegister(StopLoopCall).UnRegisterWhenGameObjectDestroyed(gameObject);
+            //activeBlock.OnMoveFail.AddListener(StopLoopCall);
         }
 
         private void OnDestroy()
         {
             mPlayerInput.onActionTriggered -= MapPlayerInput;
+        }
+
+        private void StopLoopCall()
+        {
+            Framework.TimeAction.Instance.StopLoopCall("activeBlock.MoveLeft");
+            Framework.TimeAction.Instance.StopLoopCall("activeBlock.MoveRight");
+            Framework.TimeAction.Instance.StopLoopCall("activeBlock.MoveDown");
         }
 
         private void MapPlayerInput(InputAction.CallbackContext ctx)
@@ -114,6 +118,7 @@ namespace ElosBlock
         {
             if (ctx.phase == InputActionPhase.Started)
                 activeBlock.Rotate();
+            
         }
 
         public void OnDropToGroundInput(InputAction.CallbackContext ctx)

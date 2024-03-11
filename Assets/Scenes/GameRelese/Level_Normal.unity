@@ -1669,6 +1669,33 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 929521363}
+        m_TargetAssemblyTypeName: ElosBlock.UI.Text_ClearAnim, Assembly-CSharp
+        m_MethodName: TriggerAnim
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 11400000, guid: 3a12393772bcd6d4c87349977da61b42, type: 2}
+        m_TargetAssemblyTypeName: Framework.Data.GameEventData, Assembly-CSharp
+        m_MethodName: TriggerEvent
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnMoveFail:
+    m_PersistentCalls:
+      m_Calls: []
   blockClearFXPrefab: {fileID: 6990557978016146873, guid: 07b1f4ebe0f43a446b5a32a57e67ae23, type: 3}
   blockParent: {fileID: 1322086431}
 --- !u!114 &522056514
@@ -1911,7 +1938,19 @@ MonoBehaviour:
         m_CallState: 2
   OnLevelEnd:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 11400000, guid: 3a12393772bcd6d4c87349977da61b42, type: 2}
+        m_TargetAssemblyTypeName: Framework.Data.GameEventData, Assembly-CSharp
+        m_MethodName: TriggerEvent
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   levelResetParticlePrefab: {fileID: 4802662278368152258, guid: 975d44e396146a341a0b68b0f272ee3b, type: 3}
 --- !u!114 &522056519
 MonoBehaviour:
@@ -1969,22 +2008,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 281533781183373149, guid: c7c3693d7fccaa1439c5ebaad7b24547, type: 3}
-      propertyPath: m_PresetInfoIsWorld
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 375025200665477303, guid: c7c3693d7fccaa1439c5ebaad7b24547, type: 3}
-      propertyPath: m_Camera
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 375025200665477303, guid: c7c3693d7fccaa1439c5ebaad7b24547, type: 3}
-      propertyPath: m_RenderMode
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 375025200665477303, guid: c7c3693d7fccaa1439c5ebaad7b24547, type: 3}
-      propertyPath: m_SortingLayerID
-      value: 1041149059
-      objectReference: {fileID: 0}
     - target: {fileID: 1312340995659861346, guid: c7c3693d7fccaa1439c5ebaad7b24547, type: 3}
       propertyPath: m_Name
       value: Canvas_LevelUI
@@ -2020,18 +2043,6 @@ PrefabInstance:
     - target: {fileID: 4439610254578925508, guid: c7c3693d7fccaa1439c5ebaad7b24547, type: 3}
       propertyPath: m_SizeDelta.y
       value: 1080
-      objectReference: {fileID: 0}
-    - target: {fileID: 4439610254578925508, guid: c7c3693d7fccaa1439c5ebaad7b24547, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.016296297
-      objectReference: {fileID: 0}
-    - target: {fileID: 4439610254578925508, guid: c7c3693d7fccaa1439c5ebaad7b24547, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.016296297
-      objectReference: {fileID: 0}
-    - target: {fileID: 4439610254578925508, guid: c7c3693d7fccaa1439c5ebaad7b24547, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.016296297
       objectReference: {fileID: 0}
     - target: {fileID: 4439610254578925508, guid: c7c3693d7fccaa1439c5ebaad7b24547, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3161,6 +3172,17 @@ LineRenderer:
   m_UseWorldSpace: 0
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!114 &929521363 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5603215496204692818, guid: c7c3693d7fccaa1439c5ebaad7b24547, type: 3}
+  m_PrefabInstance: {fileID: 543662140}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e60c6f05af985134faeaf280430c8266, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &939771894
 GameObject:
   m_ObjectHideFlags: 0

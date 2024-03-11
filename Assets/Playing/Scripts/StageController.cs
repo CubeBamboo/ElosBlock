@@ -15,9 +15,9 @@ namespace ElosBlock
         private StageModel mStageModel;
 
         public UnityEvent OnTouchGround;
-        public UnityEvent OnLineClear;
+        public UnityEvent<int> OnLineClear;
+        public UnityEvent OnMoveFail;
 
-        //TODO: place it to another place
         public GameObject blockClearFXPrefab;
 
         private Playing.TetrisController activeBlock;
@@ -80,6 +80,7 @@ namespace ElosBlock
 
             activeBlock = new Playing.TetrisController(go);
             activeBlock.OnTouchGround.AddListener(() => OnTouchGround?.Invoke());
+            activeBlock.OnMoveFail.AddListener(() => OnMoveFail?.Invoke());
         }
 
         public void CheckLineClear()
@@ -103,7 +104,7 @@ namespace ElosBlock
             ////////////////////////
             if (!needToClear) return;
 
-            OnLineClear?.Invoke();
+            OnLineClear?.Invoke(clearCnt);
             int[] dropCntArray = new int[blocks.GetLength(1)];
 
             //clear

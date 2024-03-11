@@ -46,6 +46,7 @@ namespace ElosBlock.Playing
             this.gameObject = gameObject;
             Debug.Assert(this.gameObject != null);
             OnTouchGround = new UnityEvent();
+            OnMoveFail = new UnityEvent();
             autoDropTimer = 0f;
 
             blocks = new Transform[transform.childCount];
@@ -96,11 +97,16 @@ namespace ElosBlock.Playing
         private void DoCommand(System.Action OnDoCommand, System.Func<bool> OnInvalidCheck=null)
         {
             //检查合法性
-            if (OnInvalidCheck != null && !OnInvalidCheck()) return;
+            if (OnInvalidCheck != null && !OnInvalidCheck())
+            {
+                OnMoveFail?.Invoke();
+                return;
+            }
             
             //行动
             OnDoCommand?.Invoke();
-            if (isOnground) return;
+            if (isOnground)
+                return;
             
             //更新落点提示
             UpdateGhostBlocks();
